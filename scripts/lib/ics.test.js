@@ -10,6 +10,12 @@ describe('formatDateTime', () => {
   it('pads single-digit month and day', () => {
     assert.equal(formatDateTime('2025-01-05', '09:00:00'), '20250105T090000Z');
   });
+  it('handles HH:MM time without seconds', () => {
+    assert.equal(formatDateTime('2025-10-12', '17:00'), '20251012T170000Z');
+  });
+  it('handles single-digit hour', () => {
+    assert.equal(formatDateTime('2025-10-12', '9:30'), '20251012T093000Z');
+  });
 });
 
 describe('reminderTrigger', () => {

@@ -14,7 +14,9 @@ const LEAGUE_NAMES = {
 };
 
 export function formatDateTime(date, time) {
-  return date.replace(/-/g, '') + 'T' + time.replace(/:/g, '').slice(0, 6) + 'Z';
+  const [h = '00', m = '00', s = '00'] = time.split(':');
+  const pad = n => String(n).padStart(2, '0');
+  return date.replace(/-/g, '') + 'T' + pad(h) + pad(m) + pad(s) + 'Z';
 }
 
 export function reminderTrigger(reminder) {

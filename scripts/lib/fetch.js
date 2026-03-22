@@ -20,12 +20,12 @@ export function httpsGet(url) {
   });
 }
 
-export async function fetchJson(url, retryOnce = true) {
-  const { statusCode, body } = await httpsGet(url);
+export async function fetchJson(url, retryOnce = true, _fetcher = httpsGet) {
+  const { statusCode, body } = await _fetcher(url);
   if (statusCode === 429 && retryOnce) {
     console.warn('Rate limited (429), retrying after 60s...');
     await new Promise(r => setTimeout(r, 60_000));
-    return fetchJson(url, false);
+    return fetchJson(url, false, _fetcher);
   }
   if (statusCode !== 200) {
     console.warn(`HTTP ${statusCode} for ${url}`);
