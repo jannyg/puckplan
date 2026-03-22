@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>puckplan.no – Hockeykalender</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 540px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #0a0a1a;
+      color: #f0f0f0;
+    }
+    h1 { color: #4fc3f7; margin-bottom: 0.25rem; }
+    p.tagline { color: #90a4ae; margin-top: 0; margin-bottom: 2rem; }
+    label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: #b0bec5; }
+    select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1.2rem;
+      border-radius: 6px;
+      border: 1px solid #37474f;
+      background: #1a1a2e;
+      color: #f0f0f0;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #4fc3f7;
+      color: #0a0a1a;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { background: #81d4fa; }
+    #url-box {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #1a1a2e;
+      border-radius: 6px;
+      border: 1px solid #37474f;
+    }
+    #url-box code {
+      display: block;
+      word-break: break-all;
+      color: #80cbc4;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+    #copy-btn {
+      width: auto;
+      padding: 0.4rem 1rem;
+      font-size: 0.9rem;
+    }
+    details {
+      margin-top: 1.5rem;
+      border: 1px solid #37474f;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+    }
+    summary { cursor: pointer; font-weight: 600; color: #b0bec5; }
+    details p { margin: 0.5rem 0; font-size: 0.9rem; color: #90a4ae; }
+    details a { color: #4fc3f7; }
+  </style>
+</head>
+<body>
+  <h1>🏒 puckplan.no</h1>
+  <p class="tagline">Abonner på hockeykamper i din kalender</p>
+
+  <label for="liga">Liga</label>
+  <select id="liga">
+    <option value="ehl">EHL – Grunnserien</option>
+    <option value="ehl-sluttspill">EHL – Sluttspill</option>
+    <option value="chl">Champions Hockey League (CHL)</option>
+  </select>
+
+  <label for="lag">Lag</label>
+  <select id="lag"><option>Laster...</option></select>
+
+  <label for="varsel">Varsel</label>
+  <select id="varsel">
+    <option value="none">Ingen varsel</option>
+    <option value="15m">15 minutter før</option>
+    <option value="1h" selected>1 time før</option>
+    <option value="3h">3 timer før</option>
+    <option value="24h">1 dag før</option>
+  </select>
+
+  <button id="gen-btn">Generer abonnements-URL</button>
+
+  <div id="url-box">
+    <code id="feed-url"></code>
+    <button id="copy-btn">Kopier URL</button>
+  </div>
+
+  <details>
+    <summary>Slik legger du til i kalenderen</summary>
+    <p><strong>iPhone / iPad:</strong> Innstillinger → Kalender → Kontoer → Legg til konto → Annet → Legg til abonnert kalender → lim inn URL</p>
+    <p><strong>Android / Google Kalender:</strong> Åpne <a href="https://calendar.google.com" target="_blank">calendar.google.com</a> → Andre kalendere (+) → Fra URL → lim inn URL</p>
+    <p><strong>Mac (Apple Kalender):</strong> Fil → Nytt kalenderabonnement → lim inn URL</p>
+    <p><strong>Outlook:</strong> Legg til kalender → Abonner fra Internett → lim inn URL</p>
+  </details>
+
+  <script type="module">
+    const BASE = window.location.origin;
+    let teamsData = [];
+
+    async function loadTeams() {
+      const res = await fetch('/data/teams.json');
+      const json = await res.json();
+      teamsData = json.teams;
+      updateTeamList();
+    }
+
+    function updateTeamList() {
+      const liga = document.getElementById('liga').value;
+      const lagSelect = document.getElementById('lag');
+      const filtered = teamsData.filter(t => t.leagues[liga]);
+      lagSelect.innerHTML = filtered.length
+        ? filtered.map(t => `<option value="${t.slug}">${t.name}</option>`).join('')
+        : '<option disabled>Ingen lag tilgjengelig</option>';
+    }
+
+    document.getElementById('liga').addEventListener('change', updateTeamList);
+
+    document.getElementById('gen-btn').addEventListener('click', () => {
+      const liga   = document.getElementById('liga').value;
+      const lag    = document.getElementById('lag').value;
+      const varsel = document.getElementById('varsel').value;
+      const url    = `${BASE}/feeds/${liga}/${lag}/${varsel}.ics`;
+
+      document.getElementById('feed-url').textContent = url;
+      document.getElementById('url-box').style.display = 'block';
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      const url = document.getElementById('feed-url').textContent;
+      navigator.clipboard.writeText(url);
+      document.getElementById('copy-btn').textContent = 'Kopiert!';
+      setTimeout(() => {
+        document.getElementById('copy-btn').textContent = 'Kopier URL';
+      }, 2000);
+    });
+
+    loadTeams();
+  </script>
+</body>
+</html>
