@@ -1,0 +1,14 @@
+{
+  "teams": [
+    { "slug": "frisk-asker",      "name": "Frisk Asker" },
+    { "slug": "lillehammer",      "name": "Lillehammer" },
+    { "slug": "lorenskog",        "name": "Lørenskog" },
+    { "slug": "narvik",           "name": "Narvik" },
+    { "slug": "nidaros",          "name": "Nidaros" },
+    { "slug": "stavanger-oilers", "name": "Stavanger Oilers" },
+    { "slug": "sparta",           "name": "Sparta" },
+    { "slug": "stjernen",         "name": "Stjernen" },
+    { "slug": "storhamar",        "name": "Storhamar" },
+    { "slug": "vaalerenga",       "name": "Vålerenga" }
+  ]
+}
