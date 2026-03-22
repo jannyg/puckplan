@@ -1,1 +1,104 @@
-{ "teams": [] }
+{
+  "teams": [
+    {
+      "slug": "frisk-asker",
+      "name": "Frisk Asker",
+      "thesportsdb_id": "140834",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "lillehammer",
+      "name": "Lillehammer",
+      "thesportsdb_id": "140836",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "lorenskog",
+      "name": "Lørenskog",
+      "thesportsdb_id": "147801",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "narvik",
+      "name": "Narvik",
+      "thesportsdb_id": "140838",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "nidaros",
+      "name": "Nidaros",
+      "thesportsdb_id": "153141",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "stavanger-oilers",
+      "name": "Stavanger Oilers",
+      "thesportsdb_id": "140840",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "sparta",
+      "name": "Sparta",
+      "thesportsdb_id": null,
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "stjernen",
+      "name": "Stjernen",
+      "thesportsdb_id": "140841",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    },
+    {
+      "slug": "storhamar",
+      "name": "Storhamar",
+      "thesportsdb_id": "140842",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": true
+      }
+    },
+    {
+      "slug": "vaalerenga",
+      "name": "Vålerenga",
+      "thesportsdb_id": "140843",
+      "leagues": {
+        "ehl": true,
+        "ehl-sluttspill": true,
+        "chl": false
+      }
+    }
+  ]
+}
