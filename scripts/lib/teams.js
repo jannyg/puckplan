@@ -21,6 +21,7 @@ export function buildTeams(ehlEvents, chlEvents, seedTeams) {
       ehl: true,
       'ehl-sluttspill': true,
       chl: chlTeamNames.has(seed.name),
+      alle: true,
     },
   }));
 }

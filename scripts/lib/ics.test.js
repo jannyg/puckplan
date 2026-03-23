@@ -64,6 +64,13 @@ describe('generateIcs', () => {
     assert.ok(ics.includes('END:VCALENDAR'));
   });
 
+  it('uses _league for UID in alle feed', () => {
+    const taggedEvent = { ...events[0], _league: 'ehl' };
+    const ics = generateIcs([taggedEvent], 'Storhamar', 'alle', 'none', new Date('2026-03-22T06:00:00Z'));
+    assert.ok(ics.includes('UID:ehl-123@puckplan.no'), 'UID uses _league, not alle');
+    assert.ok(ics.includes('X-WR-CALNAME:Storhamar \u2013 Alle turneringer'));
+  });
+
   it('filters events to only include games for the given team', () => {
     const mixed = [
       ...events,

@@ -10,7 +10,7 @@ import { buildTeams } from './lib/teams.js';
 const EHL_ID  = '4926';
 const CHL_ID  = '5277';
 const REMINDERS = ['none', '15m', '1h', '3h', '24h'];
-const LEAGUES   = ['ehl', 'ehl-sluttspill', 'chl'];
+const LEAGUES   = ['ehl', 'ehl-sluttspill', 'chl', 'alle'];
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -38,11 +38,16 @@ async function main() {
   const chlEvents = await fetchLeagueEvents(CHL_ID, season);
   console.log(`  Got ${chlEvents.length} CHL events`);
 
-  // Split EHL into serie + sluttspill
+  // Split EHL into serie + sluttspill, tag each event with its source league for UID stability
+  const ehlEvents         = ehlAllEvents.filter(e => categorizeEvent(e) === 'ehl').map(e => ({ ...e, _league: 'ehl' }));
+  const sluttspillEvents  = ehlAllEvents.filter(e => categorizeEvent(e) === 'ehl-sluttspill').map(e => ({ ...e, _league: 'ehl-sluttspill' }));
+  const chlTagged         = chlEvents.map(e => ({ ...e, _league: 'chl' }));
+
   const eventsByLeague = {
-    'ehl': ehlAllEvents.filter(e => categorizeEvent(e) === 'ehl'),
-    'ehl-sluttspill': ehlAllEvents.filter(e => categorizeEvent(e) === 'ehl-sluttspill'),
-    'chl': chlEvents,
+    'ehl': ehlEvents,
+    'ehl-sluttspill': sluttspillEvents,
+    'chl': chlTagged,
+    'alle': [...ehlEvents, ...sluttspillEvents, ...chlTagged],
   };
 
   // Build teams.json

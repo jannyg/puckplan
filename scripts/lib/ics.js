@@ -11,6 +11,7 @@ const LEAGUE_NAMES = {
   'ehl': 'EHL',
   'ehl-sluttspill': 'EHL Sluttspill',
   'chl': 'CHL',
+  'alle': 'Alle turneringer',
 };
 
 export function formatDateTime(date, time) {
@@ -52,7 +53,7 @@ export function generateIcs(allEvents, teamName, league, reminder, now = new Dat
     const dtStart = formatDateTime(e.dateEvent, e.strTime || '00:00:00');
     const dtEnd   = addTwoHours(dtStart);
     const summary = `${e.strHomeTeam} vs ${e.strAwayTeam}`;
-    const uid     = `${league}-${e.idEvent}@puckplan.no`;
+    const uid     = `${e._league || league}-${e.idEvent}@puckplan.no`;
     const location = e.strVenue || '';
 
     const lines = [

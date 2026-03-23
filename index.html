@@ -76,6 +76,7 @@
 
   <label for="liga">Liga</label>
   <select id="liga">
+    <option value="alle">Alle turneringer</option>
     <option value="ehl">EHL – Grunnserien</option>
     <option value="ehl-sluttspill">EHL – Sluttspill</option>
     <option value="chl">Champions Hockey League (CHL)</option>
@@ -122,10 +123,12 @@
     function updateTeamList() {
       const liga = document.getElementById('liga').value;
       const lagSelect = document.getElementById('lag');
-      const filtered = teamsData.filter(t => t.leagues[liga]);
+      const filtered = teamsData.filter(t => t.leagues[liga] ?? t.leagues['ehl']);
       lagSelect.innerHTML = filtered.length
-        ? filtered.map(t => `<option value="${t.slug}"${t.slug === 'storhamar' ? ' selected' : ''}>${t.name}</option>`).join('')
+        ? filtered.map(t => `<option value="${t.slug}">${t.name}</option>`).join('')
         : '<option disabled>Ingen lag tilgjengelig</option>';
+      const hasStorhamar = filtered.some(t => t.slug === 'storhamar');
+      lagSelect.value = hasStorhamar ? 'storhamar' : (filtered[0]?.slug ?? '');
     }
 
     document.getElementById('liga').addEventListener('change', updateTeamList);

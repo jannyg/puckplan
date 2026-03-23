@@ -38,6 +38,7 @@ describe('buildTeams', () => {
     assert.equal(storhamar.leagues.chl, true);
     assert.equal(storhamar.leagues.ehl, true);
     assert.equal(storhamar.leagues['ehl-sluttspill'], true);
+    assert.equal(storhamar.leagues.alle, true);
 
     const sparta = teams.find(t => t.slug === 'sparta');
     assert.equal(sparta.thesportsdb_id, '222');
