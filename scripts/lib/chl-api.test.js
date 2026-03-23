@@ -43,19 +43,19 @@ describe('fetchCurrentChlSeasonId', () => {
   it('returns correct season for month >= 6 (e.g. August 2025 → 2025/26)', async () => {
     const fetcher = makeFetcher(seasons);
     const date = new Date('2025-08-01T12:00:00Z');
-    const result = await fetchCurrentChlSeasonId(fetcher, date);
+    const result = await fetchCurrentChlSeasonId(date, fetcher);
     assert.equal(result, 'def456');
   });
 
   it('returns correct season for month < 6 (e.g. March 2026 → 2025/26)', async () => {
     const fetcher = makeFetcher(seasons);
     const date = new Date('2026-03-23T12:00:00Z');
-    const result = await fetchCurrentChlSeasonId(fetcher, date);
+    const result = await fetchCurrentChlSeasonId(date, fetcher);
     assert.equal(result, 'def456');
   });
 
   it('returns null on HTTP failure', async () => {
-    const result = await fetchCurrentChlSeasonId(makeFailFetcher(), new Date());
+    const result = await fetchCurrentChlSeasonId(new Date(), makeFailFetcher());
     assert.equal(result, null);
   });
 });

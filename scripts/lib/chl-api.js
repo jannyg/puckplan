@@ -16,7 +16,7 @@ function currentSeasonName(date) {
   }
 }
 
-export async function fetchCurrentChlSeasonId(_fetcher, date = new Date()) {
+export async function fetchCurrentChlSeasonId(date = new Date(), _fetcher) {
   const data = _fetcher
     ? await fetchJson(SEASONS_URL, true, _fetcher)
     : await fetchJson(SEASONS_URL);
