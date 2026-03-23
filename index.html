@@ -203,7 +203,7 @@
       if (!visible.length) {
         list.innerHTML = `<p id="tv-empty">${teamName ? 'Ingen planlagte TV-sendinger for ' + teamName + '.' : 'Ingen planlagte sendinger funnet.'}</p>`;
         if (selectedTeam?.leagues?.chl) {
-          list.innerHTML += '<p class="tv-viaplay">CHL-kamper sendes på <a href="https://viaplay.no" target="_blank">Viaplay</a></p>';
+          list.innerHTML += '<p class="tv-viaplay">CHL-kamper sendes på <a href="https://viaplay.no" target="_blank" rel="noopener noreferrer">Viaplay</a></p>';
         }
         return;
       }
@@ -216,7 +216,7 @@
           </span>
         </div>`).join('');
       if (selectedTeam?.leagues?.chl) {
-        list.innerHTML += '<p class="tv-viaplay">CHL-kamper sendes på <a href="https://viaplay.no" target="_blank">Viaplay</a></p>';
+        list.innerHTML += '<p class="tv-viaplay">CHL-kamper sendes på <a href="https://viaplay.no" target="_blank" rel="noopener noreferrer">Viaplay</a></p>';
       }
     }
 
