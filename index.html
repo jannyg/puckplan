@@ -122,7 +122,7 @@
   </div>
 
   <div id="tv-schedule">
-    <h2>Ishockey på TV (neste 14 dager)</h2>
+    <h2 id="tv-heading">på TV</h2>
     <div id="tv-list"><p id="tv-empty">Laster...</p></div>
   </div>
 
@@ -194,6 +194,7 @@
     function renderTvSchedule() {
       const list = document.getElementById('tv-list');
       const teamName = teamsData.find(t => t.slug === document.getElementById('lag').value)?.name ?? '';
+      document.getElementById('tv-heading').textContent = `${teamName} på TV neste 14 dager`;
       const visible = teamName
         ? allBroadcasts.filter(b => b.title.includes(teamName))
         : allBroadcasts;
