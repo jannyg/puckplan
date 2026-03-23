@@ -1,14 +1,12 @@
 // scripts/fetch-and-generate.js
 import fs from 'node:fs';
 import path from 'node:path';
-import { getCurrentSeason } from './lib/season.js';
-import { fetchLeagueEvents } from './lib/api.js';
 import { fetchRelevantSeasonUuids, fetchEhlRegularGames, fetchEhlPlayoffGames } from './lib/ehl-api.js';
+import { fetchCurrentChlSeasonId, fetchChlGames } from './lib/chl-api.js';
 import { generateIcs } from './lib/ics.js';
 import { buildTeams } from './lib/teams.js';
 import { fetchTvSchedule } from './lib/tv-schedule.js';
 
-const CHL_ID  = '5277';
 const REMINDERS = ['none', '15m', '1h', '3h', '24h'];
 const LEAGUES   = ['ehl', 'ehl-sluttspill', 'chl', 'alle'];
 
@@ -44,11 +42,14 @@ async function main() {
   const sluttspillEvents = await fetchEhlPlayoffGames(seasonUuids);
   console.log(`  Got ${sluttspillEvents.length} playoff games`);
 
-  // CHL data from TheSportsDB (Norwegian teams only have ~6 games each)
-  const chlSeason = getCurrentSeason();
-  console.log(`Fetching CHL events (TheSportsDB, season ${chlSeason})...`);
-  const chlEvents = await fetchLeagueEvents(CHL_ID, chlSeason);
-  console.log(`  Got ${chlEvents.length} CHL events`);
+  // CHL data from official chl.hockey API
+  console.log('Fetching CHL season ID...');
+  const chlSeasonId = await fetchCurrentChlSeasonId();
+  console.log(`  Season ID: ${chlSeasonId ?? 'not found'}`);
+  console.log('Fetching CHL games...');
+  const seedNames = seedTeams.map(t => t.name);
+  const chlEvents = chlSeasonId ? await fetchChlGames(chlSeasonId, seedNames) : [];
+  console.log(`  Got ${chlEvents.length} CHL games`);
 
   // Tag events with their source league for stable UIDs in the 'alle' feed
   const ehlTagged         = ehlEvents.map(e => ({ ...e, _league: 'ehl' }));
