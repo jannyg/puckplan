@@ -88,6 +88,7 @@
     .tv-meta { color: #80cbc4; white-space: nowrap; text-align: right; }
     .tv-channel { color: #90a4ae; font-size: 0.8rem; }
     #tv-empty { color: #546e7a; font-size: 0.9rem; }
+    .tv-viaplay { color: #546e7a; font-size: 0.9rem; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -193,13 +194,17 @@
 
     function renderTvSchedule() {
       const list = document.getElementById('tv-list');
-      const teamName = teamsData.find(t => t.slug === document.getElementById('lag').value)?.name ?? '';
+      const selectedTeam = teamsData.find(t => t.slug === document.getElementById('lag').value);
+      const teamName = selectedTeam?.name ?? '';
       document.getElementById('tv-heading').textContent = `${teamName} på TV neste 14 dager`;
       const visible = teamName
         ? allBroadcasts.filter(b => b.title.includes(teamName))
         : allBroadcasts;
       if (!visible.length) {
         list.innerHTML = `<p id="tv-empty">${teamName ? 'Ingen planlagte TV-sendinger for ' + teamName + '.' : 'Ingen planlagte sendinger funnet.'}</p>`;
+        if (selectedTeam?.leagues?.chl) {
+          list.innerHTML += '<p class="tv-viaplay">CHL-kamper sendes på <a href="https://viaplay.no" target="_blank">Viaplay</a></p>';
+        }
         return;
       }
       list.innerHTML = visible.map(b => `
@@ -210,6 +215,9 @@
             ${fmt(b.startTime)}
           </span>
         </div>`).join('');
+      if (selectedTeam?.leagues?.chl) {
+        list.innerHTML += '<p class="tv-viaplay">CHL-kamper sendes på <a href="https://viaplay.no" target="_blank">Viaplay</a></p>';
+      }
     }
 
     async function loadTvSchedule() {
