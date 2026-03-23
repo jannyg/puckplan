@@ -12,7 +12,7 @@ export function buildTeams(ehlEvents, chlEvents, seedTeams) {
     leagues: {
       ehl: true,
       'ehl-sluttspill': true,
-      chl: chlTeamNames.has(seed.name),
+      chl: [...chlTeamNames].some(n => n.includes(seed.name) || seed.name.includes(n)),
       alle: true,
     },
   }));

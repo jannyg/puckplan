@@ -42,4 +42,21 @@ describe('buildTeams', () => {
     const teams = buildTeams([], [], seed);
     assert.equal(teams[0].thesportsdb_id, null);
   });
+
+  it('matches CHL teams using substring matching', () => {
+    const seed = [
+      { slug: 'storhamar', name: 'Storhamar', thesportsdb_id: '140842' },
+      { slug: 'sparta', name: 'Sparta', thesportsdb_id: '140839' },
+    ];
+    const chlEventsWithSuffix = [
+      { strHomeTeam: 'Storhamar Hamar', strAwayTeam: 'Eisbären Berlin' },
+    ];
+    const teams = buildTeams([], chlEventsWithSuffix, seed);
+
+    const storhamar = teams.find(t => t.slug === 'storhamar');
+    assert.equal(storhamar.leagues.chl, true, 'should match "Storhamar" seed with "Storhamar Hamar" from API');
+
+    const sparta = teams.find(t => t.slug === 'sparta');
+    assert.equal(sparta.leagues.chl, false, 'Sparta should not match');
+  });
 });
