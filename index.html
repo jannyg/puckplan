@@ -124,7 +124,7 @@
       const lagSelect = document.getElementById('lag');
       const filtered = teamsData.filter(t => t.leagues[liga]);
       lagSelect.innerHTML = filtered.length
-        ? filtered.map(t => `<option value="${t.slug}">${t.name}</option>`).join('')
+        ? filtered.map(t => `<option value="${t.slug}"${t.slug === 'storhamar' ? ' selected' : ''}>${t.name}</option>`).join('')
         : '<option disabled>Ingen lag tilgjengelig</option>';
     }
 
