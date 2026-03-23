@@ -178,8 +178,6 @@
       }, 2000);
     });
 
-    loadTeams();
-
     let allBroadcasts = [];
 
     const fmt = dt => {
@@ -234,7 +232,7 @@
 
     document.getElementById('lag').addEventListener('change', renderTvSchedule);
 
-    loadTvSchedule();
+    loadTeams().then(() => loadTvSchedule());
   </script>
 </body>
 </html>
