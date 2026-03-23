@@ -68,6 +68,26 @@
     summary { cursor: pointer; font-weight: 600; color: #b0bec5; }
     details p { margin: 0.5rem 0; font-size: 0.9rem; color: #90a4ae; }
     details a { color: #4fc3f7; }
+    #tv-schedule {
+      margin-top: 2rem;
+      border-top: 1px solid #37474f;
+      padding-top: 1.5rem;
+    }
+    #tv-schedule h2 { color: #4fc3f7; font-size: 1rem; margin: 0 0 0.75rem; }
+    .tv-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #1e2d36;
+      font-size: 0.88rem;
+      gap: 0.5rem;
+    }
+    .tv-entry:last-child { border-bottom: none; }
+    .tv-title { color: #e0e0e0; flex: 1; }
+    .tv-meta { color: #80cbc4; white-space: nowrap; text-align: right; }
+    .tv-channel { color: #90a4ae; font-size: 0.8rem; }
+    #tv-empty { color: #546e7a; font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -99,6 +119,11 @@
   <div id="url-box">
     <code id="feed-url"></code>
     <button id="copy-btn">Kopier URL</button>
+  </div>
+
+  <div id="tv-schedule">
+    <h2>Ishockey på TV (neste 14 dager)</h2>
+    <div id="tv-list"><p id="tv-empty">Laster...</p></div>
   </div>
 
   <details>
@@ -153,6 +178,35 @@
     });
 
     loadTeams();
+
+    async function loadTvSchedule() {
+      const list = document.getElementById('tv-list');
+      try {
+        const res = await fetch('/data/tv-schedule.json');
+        if (!res.ok) throw new Error('no data');
+        const { broadcasts } = await res.json();
+        if (!broadcasts.length) {
+          list.innerHTML = '<p id="tv-empty">Ingen planlagte sendinger funnet.</p>';
+          return;
+        }
+        const fmt = dt => {
+          const d = new Date(dt + (dt.endsWith('Z') ? '' : 'Z'));
+          return d.toLocaleString('no-NO', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo' });
+        };
+        list.innerHTML = broadcasts.map(b => `
+          <div class="tv-entry">
+            <span class="tv-title">${b.title}</span>
+            <span class="tv-meta">
+              <span class="tv-channel">${b.channel}</span><br>
+              ${fmt(b.startTime)}
+            </span>
+          </div>`).join('');
+      } catch {
+        list.innerHTML = '<p id="tv-empty">Kunne ikke laste TV-sendeplan.</p>';
+      }
+    }
+
+    loadTvSchedule();
   </script>
 </body>
 </html>

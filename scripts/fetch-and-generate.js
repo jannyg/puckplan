@@ -6,6 +6,7 @@ import { fetchLeagueEvents } from './lib/api.js';
 import { fetchRelevantSeasonUuids, fetchEhlRegularGames, fetchEhlPlayoffGames } from './lib/ehl-api.js';
 import { generateIcs } from './lib/ics.js';
 import { buildTeams } from './lib/teams.js';
+import { fetchTvSchedule } from './lib/tv-schedule.js';
 
 const CHL_ID  = '5277';
 const REMINDERS = ['none', '15m', '1h', '3h', '24h'];
@@ -81,6 +82,13 @@ async function main() {
     }
   }
   console.log(`Wrote ${count} .ics files`);
+
+  // TV schedule from TV 2 EPG API
+  console.log('Fetching TV schedule...');
+  const broadcasts = await fetchTvSchedule(14);
+  const tvSchedule = { generated: now.toISOString(), broadcasts };
+  writeFile('data/tv-schedule.json', JSON.stringify(tvSchedule, null, 2) + '\n');
+  console.log(`Wrote data/tv-schedule.json (${broadcasts.length} broadcasts)`);
 }
 
 main().catch(err => {
