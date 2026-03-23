@@ -1,12 +1,4 @@
 // scripts/lib/teams.js
-export function discoverTeamId(teamName, events) {
-  for (const e of events) {
-    if (e.strHomeTeam === teamName) return e.idHomeTeam;
-    if (e.strAwayTeam === teamName) return e.idAwayTeam;
-  }
-  return null;
-}
-
 export function buildTeams(ehlEvents, chlEvents, seedTeams) {
   const chlTeamNames = new Set([
     ...chlEvents.map(e => e.strHomeTeam),
@@ -16,7 +8,7 @@ export function buildTeams(ehlEvents, chlEvents, seedTeams) {
   return seedTeams.map(seed => ({
     slug: seed.slug,
     name: seed.name,
-    thesportsdb_id: discoverTeamId(seed.name, ehlEvents),
+    thesportsdb_id: seed.thesportsdb_id ?? null,
     leagues: {
       ehl: true,
       'ehl-sluttspill': true,

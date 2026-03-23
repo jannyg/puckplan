@@ -1,14 +1,14 @@
 {
   "teams": [
-    { "slug": "frisk-asker",      "name": "Frisk Asker" },
-    { "slug": "lillehammer",      "name": "Lillehammer" },
-    { "slug": "lorenskog",        "name": "Lørenskog" },
-    { "slug": "narvik",           "name": "Narvik" },
-    { "slug": "nidaros",          "name": "Nidaros" },
-    { "slug": "stavanger-oilers", "name": "Stavanger Oilers" },
-    { "slug": "sparta",           "name": "Sparta" },
-    { "slug": "stjernen",         "name": "Stjernen" },
-    { "slug": "storhamar",        "name": "Storhamar" },
-    { "slug": "vaalerenga",       "name": "Vålerenga" }
+    { "slug": "frisk-asker",      "name": "Frisk Asker",      "thesportsdb_id": "140834" },
+    { "slug": "lillehammer",      "name": "Lillehammer",      "thesportsdb_id": "140836" },
+    { "slug": "lorenskog",        "name": "Lørenskog",        "thesportsdb_id": "147801" },
+    { "slug": "narvik",           "name": "Narvik",           "thesportsdb_id": "140838" },
+    { "slug": "nidaros",          "name": "Nidaros",          "thesportsdb_id": "153141" },
+    { "slug": "stavanger-oilers", "name": "Stavanger Oilers", "thesportsdb_id": "140840" },
+    { "slug": "sparta",           "name": "Sparta",           "thesportsdb_id": "140839" },
+    { "slug": "stjernen",         "name": "Stjernen",         "thesportsdb_id": "140841" },
+    { "slug": "storhamar",        "name": "Storhamar",        "thesportsdb_id": "140842" },
+    { "slug": "vaalerenga",       "name": "Vålerenga",        "thesportsdb_id": "140843" }
   ]
 }
