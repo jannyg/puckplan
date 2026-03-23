@@ -3,11 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getCurrentSeason } from './lib/season.js';
 import { fetchLeagueEvents } from './lib/api.js';
-import { categorizeEvent } from './lib/categorize.js';
+import { fetchRelevantSeasonUuids, fetchEhlRegularGames, fetchEhlPlayoffGames } from './lib/ehl-api.js';
 import { generateIcs } from './lib/ics.js';
 import { buildTeams } from './lib/teams.js';
 
-const EHL_ID  = '4926';
 const CHL_ID  = '5277';
 const REMINDERS = ['none', '15m', '1h', '3h', '24h'];
 const LEAGUES   = ['ehl', 'ehl-sluttspill', 'chl', 'alle'];
@@ -25,33 +24,45 @@ function writeFile(relPath, content) {
 }
 
 async function main() {
-  const season = getCurrentSeason();
-  console.log(`Season: ${season}`);
-
   const seedTeams = readJson('data/teams-seed.json').teams;
 
-  console.log('Fetching EHL events...');
-  const ehlAllEvents = await fetchLeagueEvents(EHL_ID, season);
-  console.log(`  Got ${ehlAllEvents.length} EHL events`);
+  // EHL data from ehl.no API
+  console.log('Fetching relevant EHL season(s)...');
+  const seasonUuids = await fetchRelevantSeasonUuids();
+  if (seasonUuids.length === 0) {
+    console.error('Could not determine current EHL season UUID(s)');
+    process.exit(0);
+  }
+  console.log(`  Season UUID(s): ${seasonUuids.join(', ')}`);
 
-  console.log('Fetching CHL events...');
-  const chlEvents = await fetchLeagueEvents(CHL_ID, season);
+  console.log('Fetching EHL regular season games...');
+  const ehlEvents = await fetchEhlRegularGames(seasonUuids);
+  console.log(`  Got ${ehlEvents.length} regular season games`);
+
+  console.log('Fetching EHL playoff games...');
+  const sluttspillEvents = await fetchEhlPlayoffGames(seasonUuids);
+  console.log(`  Got ${sluttspillEvents.length} playoff games`);
+
+  // CHL data from TheSportsDB (Norwegian teams only have ~6 games each)
+  const chlSeason = getCurrentSeason();
+  console.log(`Fetching CHL events (TheSportsDB, season ${chlSeason})...`);
+  const chlEvents = await fetchLeagueEvents(CHL_ID, chlSeason);
   console.log(`  Got ${chlEvents.length} CHL events`);
 
-  // Split EHL into serie + sluttspill, tag each event with its source league for UID stability
-  const ehlEvents         = ehlAllEvents.filter(e => categorizeEvent(e) === 'ehl').map(e => ({ ...e, _league: 'ehl' }));
-  const sluttspillEvents  = ehlAllEvents.filter(e => categorizeEvent(e) === 'ehl-sluttspill').map(e => ({ ...e, _league: 'ehl-sluttspill' }));
+  // Tag events with their source league for stable UIDs in the 'alle' feed
+  const ehlTagged         = ehlEvents.map(e => ({ ...e, _league: 'ehl' }));
+  const sluttspillTagged  = sluttspillEvents.map(e => ({ ...e, _league: 'ehl-sluttspill' }));
   const chlTagged         = chlEvents.map(e => ({ ...e, _league: 'chl' }));
 
   const eventsByLeague = {
-    'ehl': ehlEvents,
-    'ehl-sluttspill': sluttspillEvents,
-    'chl': chlTagged,
-    'alle': [...ehlEvents, ...sluttspillEvents, ...chlTagged],
+    'ehl':           ehlTagged,
+    'ehl-sluttspill': sluttspillTagged,
+    'chl':           chlTagged,
+    'alle':          [...ehlTagged, ...sluttspillTagged, ...chlTagged],
   };
 
   // Build teams.json
-  const teams = buildTeams(ehlAllEvents, chlEvents, seedTeams);
+  const teams = buildTeams(ehlEvents, chlEvents, seedTeams);
   writeFile('data/teams.json', JSON.stringify({ teams }, null, 2) + '\n');
   console.log('Wrote data/teams.json');
 
