@@ -195,9 +195,11 @@
       const selectedTeam = teamsData.find(t => t.slug === document.getElementById('lag').value);
       const teamName = selectedTeam?.name ?? '';
       document.getElementById('tv-heading').textContent = `${teamName} på TV neste 14 dager`;
+      const now = new Date().toISOString();
+      const upcoming = allBroadcasts.filter(b => (b.endTime ?? b.startTime) >= now);
       const visible = teamName
-        ? allBroadcasts.filter(b => b.title.includes(teamName))
-        : allBroadcasts;
+        ? upcoming.filter(b => b.title.includes(teamName))
+        : upcoming;
       if (!visible.length) {
         list.innerHTML = `<p id="tv-empty">${teamName ? 'Ingen planlagte TV-sendinger for ' + teamName + '.' : 'Ingen planlagte sendinger funnet.'}</p>`;
         if (selectedTeam?.leagues?.chl) {

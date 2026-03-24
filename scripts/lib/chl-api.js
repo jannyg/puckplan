@@ -16,14 +16,22 @@ function currentSeasonName(date) {
   }
 }
 
+// Unwrap CHL API responses that may be a plain array or {data: [...]} wrapper.
+function unwrapArray(resp) {
+  if (Array.isArray(resp)) return resp;
+  if (resp && Array.isArray(resp.data)) return resp.data;
+  return null;
+}
+
 export async function fetchCurrentChlSeasonId(date = new Date(), _fetcher) {
-  const data = _fetcher
+  const raw = _fetcher
     ? await fetchJson(SEASONS_URL, true, _fetcher)
     : await fetchJson(SEASONS_URL);
-  if (!data) return null;
+  const seasons = unwrapArray(raw);
+  if (!seasons) return null;
 
   const targetName = currentSeasonName(date);
-  const match = data.find(s => s.name === targetName);
+  const match = seasons.find(s => s.name === targetName);
   return match ? match._entityId : null;
 }
 
@@ -42,12 +50,12 @@ function normalizeGame(game) {
 
 export async function fetchChlGames(seasonId, seedTeamNames, _fetcher) {
   const url = `${SCHEDULE_URL_PREFIX}${seasonId}.json`;
-  const data = _fetcher
+  const raw = _fetcher
     ? await fetchJson(url, true, _fetcher)
     : await fetchJson(url);
-  if (!data) return [];
+  if (!raw) return [];
 
-  const games = Array.isArray(data) ? data : (data.games ?? []);
+  const games = unwrapArray(raw) ?? (raw.games ? unwrapArray(raw.games) ?? [] : []);
 
   return games
     .filter(game => {

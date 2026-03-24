@@ -3,7 +3,7 @@ name: Update hockey feeds
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # Daily at 06:00 UTC
+    - cron: '0 4 * * *'   # 05:00 CET / 06:00 CEST — daily refresh
   workflow_dispatch:        # Allow manual trigger
 
 permissions:

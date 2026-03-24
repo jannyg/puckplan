@@ -54,6 +54,13 @@ describe('fetchCurrentChlSeasonId', () => {
     assert.equal(result, 'def456');
   });
 
+  it('handles wrapped response format {data: [...]}', async () => {
+    const fetcher = makeFetcher({ _type: 'Corebine.Core.Protocol.Response.Array', data: seasons });
+    const date = new Date('2025-08-01T12:00:00Z');
+    const result = await fetchCurrentChlSeasonId(date, fetcher);
+    assert.equal(result, 'def456');
+  });
+
   it('returns null on HTTP failure', async () => {
     const result = await fetchCurrentChlSeasonId(new Date(), makeFailFetcher());
     assert.equal(result, null);
@@ -96,6 +103,13 @@ describe('fetchChlGames', () => {
 
   it('handles response that is a direct array (not wrapped in object)', async () => {
     const fetcher = makeFetcher([norwegianGame]);
+    const result = await fetchChlGames('def456', seedTeamNames, fetcher);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].idEvent, 'game-001');
+  });
+
+  it('handles wrapped response format {data: [...]}', async () => {
+    const fetcher = makeFetcher({ _type: 'Corebine.Core.Protocol.Response.Array', data: [norwegianGame] });
     const result = await fetchChlGames('def456', seedTeamNames, fetcher);
     assert.equal(result.length, 1);
     assert.equal(result[0].idEvent, 'game-001');
