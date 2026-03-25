@@ -73,7 +73,7 @@
       "leagues": {
         "ehl": true,
         "ehl-sluttspill": true,
-        "chl": false,
+        "chl": true,
         "alle": true
       }
     },
