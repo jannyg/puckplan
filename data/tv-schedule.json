@@ -1,32 +1,11 @@
 {
-  "generated": "2026-03-23T10:45:33.850Z",
+  "generated": "2026-03-31T12:13:20.966Z",
   "broadcasts": [
     {
-      "title": "NM-sluttspill ishockey, menn: Storhamar - Stavanger Oilers",
-      "channel": "TV 2 Sport 2",
-      "startTime": "2026-03-23T18:55:00",
-      "endTime": "2026-03-23T21:30:00",
-      "live": true
-    },
-    {
-      "title": "NM-sluttspill ishockey, menn: Vålerenga - Frisk Asker",
-      "channel": "TV 2 Sport 2",
-      "startTime": "2026-03-24T18:55:00",
-      "endTime": "2026-03-24T21:30:00",
-      "live": true
-    },
-    {
-      "title": "NM-sluttspill ishockey, menn: Stavanger Oilers - Storhamar",
-      "channel": "TV 2 Sport 2",
-      "startTime": "2026-03-25T18:55:00",
-      "endTime": "2026-03-25T21:30:00",
-      "live": true
-    },
-    {
-      "title": "NM-sluttspill ishockey, menn: Frisk Asker - Vålerenga",
-      "channel": "TV 2 Sport 2",
-      "startTime": "2026-03-26T18:55:00",
-      "endTime": "2026-03-26T21:30:00",
+      "title": "NM-sluttspill ishockey, menn: Storhamar - Frisk Asker",
+      "channel": "TV 2 Sport 1",
+      "startTime": "2026-04-04T15:50:00",
+      "endTime": "2026-04-04T18:35:00",
       "live": true
     }
   ]
