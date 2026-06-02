@@ -109,6 +109,15 @@
         "chl": false,
         "alle": true
       }
+    },
+    {
+      "slug": "norge",
+      "name": "Norge",
+      "thesportsdb_id": "141346",
+      "type": "national",
+      "leagues": {
+        "landslag": true
+      }
     }
   ]
 }
