@@ -12,6 +12,7 @@ const LEAGUE_NAMES = {
   'ehl-sluttspill': 'EHL Sluttspill',
   'chl': 'CHL',
   'alle': 'Alle turneringer',
+  'landslag': 'Landslag',
 };
 
 export function formatDateTime(date, time) {

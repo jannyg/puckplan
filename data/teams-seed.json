@@ -9,6 +9,7 @@
     { "slug": "sparta",           "name": "Sparta",           "thesportsdb_id": "140839" },
     { "slug": "stjernen",         "name": "Stjernen",         "thesportsdb_id": "140841" },
     { "slug": "storhamar",        "name": "Storhamar",        "thesportsdb_id": "140842" },
-    { "slug": "vaalerenga",       "name": "Vålerenga",        "thesportsdb_id": "140843" }
+    { "slug": "vaalerenga",       "name": "Vålerenga",        "thesportsdb_id": "140843" },
+    { "slug": "norge",           "name": "Norge",            "thesportsdb_id": "141346", "type": "national" }
   ]
 }

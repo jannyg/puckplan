@@ -3,12 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fetchRelevantSeasonUuids, fetchEhlRegularGames, fetchEhlPlayoffGames } from './lib/ehl-api.js';
 import { fetchCurrentChlSeasonId, fetchChlGames } from './lib/chl-api.js';
+import { fetchAllNationalGames } from './lib/national-api.js';
 import { generateIcs } from './lib/ics.js';
 import { buildTeams } from './lib/teams.js';
 import { fetchTvSchedule } from './lib/tv-schedule.js';
 
 const REMINDERS = ['none', '15m', '1h', '3h', '24h'];
-const LEAGUES   = ['ehl', 'ehl-sluttspill', 'chl', 'alle'];
+const CLUB_LEAGUES = ['ehl', 'ehl-sluttspill', 'chl', 'alle'];
+const NATIONAL_LEAGUES = ['landslag'];
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
@@ -51,16 +53,26 @@ async function main() {
   const chlEvents = chlSeasonId ? await fetchChlGames(chlSeasonId, seedNames) : [];
   console.log(`  Got ${chlEvents.length} CHL games`);
 
+  // National team data from TheSportsDB + hockey.no
+  console.log('Fetching national team games...');
+  const nationalEvents = await fetchAllNationalGames();
+  console.log(`  Got ${nationalEvents.length} national team games`);
+
   // Tag events with their source league for stable UIDs in the 'alle' feed
   const ehlTagged         = ehlEvents.map(e => ({ ...e, _league: 'ehl' }));
   const sluttspillTagged  = sluttspillEvents.map(e => ({ ...e, _league: 'ehl-sluttspill' }));
   const chlTagged         = chlEvents.map(e => ({ ...e, _league: 'chl' }));
+  const nationalTagged    = nationalEvents.map(e => ({ ...e, _league: 'landslag' }));
 
-  const eventsByLeague = {
+  const clubEventsByLeague = {
     'ehl':           ehlTagged,
     'ehl-sluttspill': sluttspillTagged,
     'chl':           chlTagged,
     'alle':          [...ehlTagged, ...sluttspillTagged, ...chlTagged],
+  };
+
+  const nationalEventsByLeague = {
+    'landslag': nationalTagged,
   };
 
   // Build teams.json
@@ -72,7 +84,11 @@ async function main() {
   const now = new Date();
   let count = 0;
   for (const team of teams) {
-    for (const league of LEAGUES) {
+    const isNational = team.type === 'national';
+    const leagues = isNational ? NATIONAL_LEAGUES : CLUB_LEAGUES;
+    const eventsByLeague = isNational ? nationalEventsByLeague : clubEventsByLeague;
+
+    for (const league of leagues) {
       for (const reminder of REMINDERS) {
         const events = eventsByLeague[league];
         const ics = generateIcs(events, team.name, league, reminder, now);

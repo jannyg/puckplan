@@ -59,4 +59,22 @@ describe('buildTeams', () => {
     const sparta = teams.find(t => t.slug === 'sparta');
     assert.equal(sparta.leagues.chl, false, 'Sparta should not match');
   });
+
+  it('builds national team with landslag league only', () => {
+    const seed = [
+      { slug: 'storhamar', name: 'Storhamar', thesportsdb_id: '140842' },
+      { slug: 'norge', name: 'Norge', thesportsdb_id: '141346', type: 'national' },
+    ];
+    const teams = buildTeams(ehlEvents, chlEvents, seed);
+
+    const norge = teams.find(t => t.slug === 'norge');
+    assert.equal(norge.type, 'national');
+    assert.equal(norge.leagues.landslag, true);
+    assert.equal(norge.leagues.ehl, undefined);
+    assert.equal(norge.leagues.chl, undefined);
+
+    const storhamar = teams.find(t => t.slug === 'storhamar');
+    assert.equal(storhamar.type, undefined);
+    assert.equal(storhamar.leagues.ehl, true);
+  });
 });
