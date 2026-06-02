@@ -150,7 +150,7 @@
     function updateTeamList() {
       const liga = document.getElementById('liga').value;
       const lagSelect = document.getElementById('lag');
-      const filtered = teamsData.filter(t => t.leagues[liga] ?? t.leagues['ehl']);
+      const filtered = teamsData.filter(t => t.leagues[liga]);
       lagSelect.innerHTML = filtered.length
         ? filtered.map(t => `<option value="${t.slug}">${t.name}</option>`).join('')
         : '<option disabled>Ingen lag tilgjengelig</option>';
