@@ -68,6 +68,26 @@
     summary { cursor: pointer; font-weight: 600; color: #b0bec5; }
     details p { margin: 0.5rem 0; font-size: 0.9rem; color: #90a4ae; }
     details a { color: #4fc3f7; }
+    #upcoming-games {
+      margin-top: 2rem;
+      border-top: 1px solid #37474f;
+      padding-top: 1.5rem;
+    }
+    #upcoming-games h2 { color: #4fc3f7; font-size: 1rem; margin: 0 0 0.75rem; }
+    .game-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #1e2d36;
+      font-size: 0.88rem;
+      gap: 0.5rem;
+    }
+    .game-entry:last-child { border-bottom: none; }
+    .game-title { color: #e0e0e0; flex: 1; }
+    .game-meta { color: #80cbc4; white-space: nowrap; text-align: right; }
+    .game-venue { color: #90a4ae; font-size: 0.8rem; }
+    #upcoming-empty { color: #546e7a; font-size: 0.9rem; }
     #tv-schedule {
       margin-top: 2rem;
       border-top: 1px solid #37474f;
@@ -123,6 +143,11 @@
     <button id="copy-btn">Kopier URL</button>
   </div>
 
+  <div id="upcoming-games">
+    <h2 id="upcoming-heading">Neste kamper</h2>
+    <div id="upcoming-list"><p id="upcoming-empty">Velg lag for å se kamper</p></div>
+  </div>
+
   <div id="tv-schedule">
     <h2 id="tv-heading">på TV</h2>
     <div id="tv-list"><p id="tv-empty">Laster...</p></div>
@@ -158,7 +183,7 @@
       lagSelect.value = hasStorhamar ? 'storhamar' : (filtered[0]?.slug ?? '');
     }
 
-    document.getElementById('liga').addEventListener('change', () => { updateTeamList(); renderTvSchedule(); });
+    document.getElementById('liga').addEventListener('change', () => { updateTeamList(); renderUpcomingGames(); renderTvSchedule(); });
 
     document.getElementById('gen-btn').addEventListener('click', () => {
       const liga   = document.getElementById('liga').value;
@@ -180,6 +205,83 @@
     });
 
     let allBroadcasts = [];
+
+    function parseIcs(text) {
+      const events = [];
+      const blocks = text.split('BEGIN:VEVENT');
+      for (let i = 1; i < blocks.length; i++) {
+        const block = blocks[i].split('END:VEVENT')[0];
+        const get = key => {
+          const m = block.match(new RegExp('^' + key + ':(.+)$', 'm'));
+          return m ? m[1].trim() : '';
+        };
+        const raw = get('DTSTART');
+        if (!raw) continue;
+        // Parse DTSTART (format: 20250913T140000Z)
+        const dt = raw.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+          '$1-$2-$3T$4:$5:$6Z');
+        events.push({
+          start: new Date(dt),
+          summary: get('SUMMARY'),
+          location: get('LOCATION'),
+        });
+      }
+      return events;
+    }
+
+    const fmtGame = dt => {
+      const weekday  = dt.toLocaleString('no-NO', { weekday: 'short', timeZone: 'Europe/Oslo' });
+      const dayMonth = dt.toLocaleString('no-NO', { day: 'numeric', month: 'short', timeZone: 'Europe/Oslo' });
+      const time     = dt.toLocaleString('no-NO', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo' });
+      return `${weekday} ${dayMonth} kl. ${time}`;
+    };
+
+    async function renderUpcomingGames() {
+      const list = document.getElementById('upcoming-list');
+      const liga = document.getElementById('liga').value;
+      const lag  = document.getElementById('lag').value;
+      const selectedTeam = teamsData.find(t => t.slug === lag);
+      const teamName = selectedTeam?.name ?? '';
+
+      document.getElementById('upcoming-heading').textContent =
+        teamName ? `Neste kamper for ${teamName}` : 'Neste kamper';
+
+      if (!lag) {
+        list.innerHTML = '<p id="upcoming-empty">Velg lag for å se kamper</p>';
+        return;
+      }
+
+      list.innerHTML = '<p id="upcoming-empty">Laster kamper…</p>';
+
+      try {
+        const url = `/feeds/${liga}/${lag}/none.ics`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('no feed');
+        const text = await res.text();
+        const events = parseIcs(text);
+        const now = new Date();
+        const upcoming = events
+          .filter(e => e.start > now)
+          .sort((a, b) => a.start - b.start)
+          .slice(0, 3);
+
+        if (!upcoming.length) {
+          list.innerHTML = `<p id="upcoming-empty">Ingen kommende kamper funnet for ${teamName}.</p>`;
+          return;
+        }
+
+        list.innerHTML = upcoming.map(e => `
+          <div class="game-entry">
+            <span class="game-title">${e.summary}</span>
+            <span class="game-meta">
+              <span class="game-venue">${e.location}</span><br>
+              ${fmtGame(e.start)}
+            </span>
+          </div>`).join('');
+      } catch {
+        list.innerHTML = `<p id="upcoming-empty">Kunne ikke laste kamper.</p>`;
+      }
+    }
 
     const fmt = dt => {
       // EPG returns Norwegian local time without timezone — parse as-is to avoid offset shifts
@@ -233,9 +335,9 @@
       }
     }
 
-    document.getElementById('lag').addEventListener('change', renderTvSchedule);
+    document.getElementById('lag').addEventListener('change', () => { renderUpcomingGames(); renderTvSchedule(); });
 
-    loadTeams().then(() => loadTvSchedule());
+    loadTeams().then(() => { renderUpcomingGames(); loadTvSchedule(); });
   </script>
 </body>
 </html>
