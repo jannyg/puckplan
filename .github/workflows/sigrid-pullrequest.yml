@@ -22,6 +22,7 @@ jobs:
       - name: "Sigrid pull request feedback"
         uses: mshick/add-pr-comment@v2
         if: always()
+        continue-on-error: true
         with:
           message-id: sigrid
           message-path: sigrid-ci-output/*feedback.md
