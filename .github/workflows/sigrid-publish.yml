@@ -15,7 +15,7 @@ jobs:
       - name: Sigrid CI
         uses: Software-Improvement-Group/sigridci@main
         with:
-          customer: Miles Sigrid Trial
+          customer: Miles
           system: puckplan
           publishonly: true
         env:
