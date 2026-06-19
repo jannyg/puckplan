@@ -16,7 +16,7 @@ jobs:
         uses: Software-Improvement-Group/sigridci@main
         with:
           customer: Miles
-          system: puckplan
+          system: ${{ github.event.repository.name }}
         env:
           SIGRID_CI_TOKEN: "${{ secrets.SIGRID_CI_TOKEN }}"
       - name: "Sigrid pull request feedback"
