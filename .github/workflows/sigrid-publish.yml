@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+    workflow_dispatch:
 
 jobs:
   sigridci:
@@ -16,7 +17,7 @@ jobs:
         uses: Software-Improvement-Group/sigridci@main
         with:
           customer: Miles Sigrid Trial
-          system:  ${{ github.event.repository.name }}
+          system: ${{ github.event.repository.name }}
           publishonly: true
         env:
           SIGRID_CI_TOKEN: "${{ secrets.SIGRID_CI_TOKEN }}"
