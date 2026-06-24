@@ -23,6 +23,16 @@ function unwrapArray(resp) {
   return null;
 }
 
+// The CHL API uses fuller club names (e.g. "Storhamar Hamar") than our seed
+// names (e.g. "Storhamar"). Downstream logic (generateIcs, buildTeams) relies
+// on exact team-name matches, so map each API name back to its seed name.
+function resolveTeamName(apiName, seedTeamNames) {
+  const seed = seedTeamNames.find(s =>
+    apiName.includes(s) || s.includes(apiName)
+  );
+  return seed ?? apiName;
+}
+
 export async function fetchCurrentChlSeasonId(date = new Date(), _fetcher) {
   const raw = _fetcher
     ? await fetchJson(SEASONS_URL, true, _fetcher)
@@ -35,11 +45,11 @@ export async function fetchCurrentChlSeasonId(date = new Date(), _fetcher) {
   return match ? match._entityId : null;
 }
 
-function normalizeGame(game) {
+function normalizeGame(game, seedTeamNames) {
   return {
     idEvent:     game._entityId,
-    strHomeTeam: game.teams.home.name,
-    strAwayTeam: game.teams.away.name,
+    strHomeTeam: resolveTeamName(game.teams.home.name, seedTeamNames),
+    strAwayTeam: resolveTeamName(game.teams.away.name, seedTeamNames),
     dateEvent:   game.startDate.slice(0, 10),
     strTime:     game.startDate.slice(11, 19),
     strVenue:    game.venue?.name ?? '',
@@ -66,5 +76,5 @@ export async function fetchChlGames(seasonId, seedTeamNames, _fetcher) {
         awayTeam.includes(s) || s.includes(awayTeam)
       );
     })
-    .map(normalizeGame);
+    .map(game => normalizeGame(game, seedTeamNames));
 }

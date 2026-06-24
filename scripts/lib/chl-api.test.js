@@ -74,13 +74,19 @@ describe('fetchChlGames', () => {
     assert.equal(result.length, 1);
     const g = result[0];
     assert.equal(g.idEvent, 'game-001');
-    assert.equal(g.strHomeTeam, 'Storhamar Hamar');
+    assert.equal(g.strHomeTeam, 'Storhamar');
     assert.equal(g.strAwayTeam, 'Frölunda HC');
     assert.equal(g.dateEvent, '2026-02-14');
     assert.equal(g.strTime, '18:00:00');
     assert.equal(g.strVenue, 'Hamar Olympic Hall');
     assert.equal(g.idHomeTeam, 'team-sh');
     assert.equal(g.idAwayTeam, 'team-fr');
+  });
+
+  it('maps API club name to seed name so downstream exact-match filters work', async () => {
+    const fetcher = makeFetcher({ games: [norwegianGame] });
+    const result = await fetchChlGames('def456', seedTeamNames, fetcher);
+    assert.equal(result[0].strHomeTeam, 'Storhamar');
   });
 
   it('filters — only includes games with a Norwegian team (substring match)', async () => {
