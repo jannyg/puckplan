@@ -1,4 +1,5 @@
 // scripts/lib/fetch.test.js
+// CI smoke test: dummy change to verify Tests + Sigrid PR workflows run.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseJsonResponse, fetchJson } from './fetch.js';
