@@ -70,4 +70,34 @@ describe('fetchTvSchedule', () => {
     assert.equal(result[0].title, 'Ishockey A');
     assert.equal(result[1].title, 'Ishockey B');
   });
+
+  it('queries one URL per requested day', async () => {
+    const urls = [];
+    const fetcher = async (url) => {
+      urls.push(url);
+      return { statusCode: 200, body: JSON.stringify([]) };
+    };
+    await fetchTvSchedule(3, fetcher);
+    assert.equal(urls.length, 3);
+    assert.ok(urls.every(u => u.includes('/epg/days/')));
+  });
+
+  it('matches the ishockey keyword case-insensitively', async () => {
+    const upper = { ...hockeyProgram, title: 'ISHOCKEY: Storhamar - Lillehammer' };
+    const result = await fetchTvSchedule(1, makeFetcher(makeDay(tv2Channel, [upper])));
+    assert.equal(result.length, 1);
+  });
+
+  it('defaults live to false when the field is absent', async () => {
+    const noLive = { title: 'Ishockey: test', startTime: '2026-03-23T18:00:00', endTime: '2026-03-23T20:00:00' };
+    const result = await fetchTvSchedule(1, makeFetcher(makeDay(tv2Channel, [noLive])));
+    assert.equal(result.length, 1);
+    assert.equal(result[0].live, false);
+  });
+
+  it('tolerates a day entry with no programs array', async () => {
+    const fetcher = makeFetcher([{ channel: tv2Channel }]);
+    const result = await fetchTvSchedule(1, fetcher);
+    assert.deepEqual(result, []);
+  });
 });

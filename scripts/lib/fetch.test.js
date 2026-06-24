@@ -53,4 +53,32 @@ describe('fetchJson', () => {
     globalThis.setTimeout = origSetTimeout;
     assert.equal(result, null);
   });
+
+  it('returns null when a 200 response has an unparseable body', async () => {
+    const mockFetcher = async () => ({ statusCode: 200, body: 'not json' });
+    const result = await fetchJson('http://example.com', true, mockFetcher);
+    assert.equal(result, null);
+  });
+
+  it('returns null when a retried 429 still fails', async () => {
+    let calls = 0;
+    const mockFetcher = async () => {
+      calls++;
+      return { statusCode: 429, body: '' };
+    };
+    const origSetTimeout = globalThis.setTimeout;
+    globalThis.setTimeout = (fn) => { fn(); return 0; };
+    const result = await fetchJson('http://example.com', true, mockFetcher);
+    globalThis.setTimeout = origSetTimeout;
+    assert.equal(result, null);
+    assert.equal(calls, 2, 'one initial call plus exactly one retry');
+  });
+
+  it('does not retry on 200 even when retryOnce is true', async () => {
+    let calls = 0;
+    const mockFetcher = async () => { calls++; return { statusCode: 200, body: '{"ok":true}' }; };
+    const result = await fetchJson('http://example.com', true, mockFetcher);
+    assert.deepEqual(result, { ok: true });
+    assert.equal(calls, 1);
+  });
 });

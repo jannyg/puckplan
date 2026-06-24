@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Run tests
+        run: npm test
+
       - name: Fetch data and generate feeds
         run: node scripts/fetch-and-generate.js
 

@@ -77,4 +77,24 @@ describe('buildTeams', () => {
     assert.equal(storhamar.type, undefined);
     assert.equal(storhamar.leagues.ehl, true);
   });
+
+  it('sets chl false for every club when there are no CHL events', () => {
+    const teams = buildTeams(ehlEvents, [], seedTeams);
+    for (const t of teams) {
+      assert.equal(t.leagues.chl, false, `${t.slug} should have chl=false`);
+    }
+  });
+
+  it('preserves seed order and slugs in the output', () => {
+    const teams = buildTeams([], [], seedTeams);
+    assert.deepEqual(teams.map(t => t.slug), seedTeams.map(s => s.slug));
+  });
+
+  it('always sets ehl, ehl-sluttspill and alle true for clubs regardless of events', () => {
+    const teams = buildTeams([], [], seedTeams);
+    const storhamar = teams.find(t => t.slug === 'storhamar');
+    assert.equal(storhamar.leagues.ehl, true);
+    assert.equal(storhamar.leagues['ehl-sluttspill'], true);
+    assert.equal(storhamar.leagues.alle, true);
+  });
 });

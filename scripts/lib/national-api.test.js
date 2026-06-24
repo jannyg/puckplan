@@ -165,6 +165,31 @@ describe('fetchNationalFriendlyGames', () => {
     assert.equal(detailFetched, true);
   });
 
+  it('converts winter (CET) kickoff times with a -1h offset', async () => {
+    const overview = `
+      <a href="/landslag/a-landslaget-menn/2025-2026/aktivitet/desember-cup/">
+        Kamper mot SWE
+      </a>
+      <span>11.12.2025</span>
+    `;
+    const detail = `
+      <h1>Kamper mot SWE</h1>
+      <p>Dato fra: 11. desember 2025 18:00</p>
+      <p>Torsdag 11/12 kl 19.00 - NOR v SWE 2-1</p>
+    `;
+    const fetcher = async (url) =>
+      url.includes('/aktivitet/')
+        ? { statusCode: 200, body: detail }
+        : { statusCode: 200, body: overview };
+
+    const games = await fetchNationalFriendlyGames(new Date('2025-12-01'), fetcher);
+    assert.equal(games.length, 1);
+    assert.equal(games[0].strHomeTeam, 'Norge');
+    assert.equal(games[0].strAwayTeam, 'Sverige');
+    assert.equal(games[0].dateEvent, '2025-12-11');
+    assert.equal(games[0].strTime, '18:00:00'); // 19:00 CET -> 18:00 UTC
+  });
+
   it('returns empty array when hockey.no is unavailable', async () => {
     const games = await fetchNationalFriendlyGames(new Date('2026-03-15'), makeFetcher('', 500));
     assert.deepEqual(games, []);

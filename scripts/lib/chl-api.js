@@ -6,7 +6,7 @@ const SCHEDULE_URL_PREFIX = 'https://www.chl.hockey/api/s3?q=schedule-21ec9dad81
 
 // Returns the season name string for the given date, e.g. "2025/26".
 // month < 6 → previous-year/year, month >= 6 → year/next-year
-function currentSeasonName(date) {
+export function currentSeasonName(date) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   if (month < 6) {
@@ -26,7 +26,7 @@ function unwrapArray(resp) {
 // The CHL API uses fuller club names (e.g. "Storhamar Hamar") than our seed
 // names (e.g. "Storhamar"). Downstream logic (generateIcs, buildTeams) relies
 // on exact team-name matches, so map each API name back to its seed name.
-function resolveTeamName(apiName, seedTeamNames) {
+export function resolveTeamName(apiName, seedTeamNames) {
   const seed = seedTeamNames.find(s =>
     apiName.includes(s) || s.includes(apiName)
   );

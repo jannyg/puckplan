@@ -49,15 +49,35 @@ describe('fetchRelevantSeasonUuids', () => {
         { uuid: SEASON_UUID, code: '2025' },
       ],
     };
-    const uuids = await fetchRelevantSeasonUuids(makeFetcher(response));
-    // Both included during transition (current date is 2026-03, so code = '2025')
+    // Pin date to May 2026 so currentSeasonCode() === '2025' regardless of when the test runs
+    const uuids = await fetchRelevantSeasonUuids(makeFetcher(response), new Date('2026-05-15'));
+    // Both included during transition (date-based code = '2025', default = '2026')
     assert.ok(uuids.includes('new-season-uuid'));
     assert.ok(uuids.includes(SEASON_UUID));
   });
 
+  it('returns only the default when no season matches the date-based code', async () => {
+    const response = {
+      defaultSsgtFilter: { season: 'default-uuid' },
+      season: [{ uuid: 'default-uuid', code: '2030' }],
+    };
+    const uuids = await fetchRelevantSeasonUuids(makeFetcher(response), new Date('2026-05-15'));
+    assert.deepEqual(uuids, ['default-uuid']);
+  });
+
+  it('returns date-based match even when API has no default', async () => {
+    const response = {
+      season: [{ uuid: SEASON_UUID, code: '2025' }],
+    };
+    const uuids = await fetchRelevantSeasonUuids(makeFetcher(response), new Date('2026-05-15'));
+    assert.deepEqual(uuids, [SEASON_UUID]);
+  });
+
   it('deduplicates when default and date-based match are the same', async () => {
-    const uuids = await fetchRelevantSeasonUuids(makeFetcher(mockFilterResponse));
+    // mockFilterResponse default === SEASON_UUID (code 2025); pin to a 2025-season date
+    const uuids = await fetchRelevantSeasonUuids(makeFetcher(mockFilterResponse), new Date('2026-05-15'));
     assert.equal(new Set(uuids).size, uuids.length);
+    assert.deepEqual(uuids, [SEASON_UUID]);
   });
 
   it('returns empty array when fetch fails', async () => {

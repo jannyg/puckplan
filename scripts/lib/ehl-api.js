@@ -18,7 +18,7 @@ export function currentSeasonCode(date = new Date()) {
 // matching the current date calculation. Usually they're the same. During
 // transitions (e.g. summer when a new season is published), both are included
 // so games from neither season are lost.
-export async function fetchRelevantSeasonUuids(_fetcher) {
+export async function fetchRelevantSeasonUuids(_fetcher, date = new Date()) {
   const url = `${BASE_URL}/season-series-game-types-filter?series=${SERIES_UUID}`;
   const data = _fetcher
     ? await fetchJson(url, true, _fetcher)
@@ -34,7 +34,7 @@ export async function fetchRelevantSeasonUuids(_fetcher) {
 
   // Also include the season matching today's date, in case the API default
   // has already flipped to a new season while the current season is ongoing
-  const code = currentSeasonCode();
+  const code = currentSeasonCode(date);
   const match = (data.season ?? []).find(s => s.code === code);
   if (match) uuids.add(match.uuid);
 

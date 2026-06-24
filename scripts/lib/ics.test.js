@@ -82,4 +82,47 @@ describe('generateIcs', () => {
     assert.ok(ics.includes('Storhamar vs Sparta'));
     assert.ok(!ics.includes('Vålerenga vs Sparta'));
   });
+
+  it('includes games where the team plays away', () => {
+    const awayEvent = [{
+      idEvent: '321', strHomeTeam: 'Sparta', strAwayTeam: 'Storhamar',
+      dateEvent: '2025-10-20', strTime: '19:00:00', strVenue: 'Sparta Amfi',
+      idHomeTeam: '133920', idAwayTeam: '133919',
+    }];
+    const ics = generateIcs(awayEvent, 'Storhamar', 'ehl', 'none', new Date('2026-03-22T06:00:00Z'));
+    assert.ok(ics.includes('SUMMARY:Sparta vs Storhamar'));
+  });
+
+  it('omits LOCATION line when venue is empty', () => {
+    const noVenue = [{ ...events[0], strVenue: '' }];
+    const ics = generateIcs(noVenue, 'Storhamar', 'ehl', 'none', new Date('2026-03-22T06:00:00Z'));
+    assert.ok(ics.includes('BEGIN:VEVENT'));
+    assert.ok(!ics.includes('LOCATION:'));
+  });
+
+  it('uses CRLF line endings throughout', () => {
+    const ics = generateIcs(events, 'Storhamar', 'ehl', 'none', new Date('2026-03-22T06:00:00Z'));
+    // Every line break must be CRLF; no bare LF should remain after stripping CRLF
+    assert.ok(ics.includes('\r\n'));
+    assert.equal(ics.replace(/\r\n/g, '').includes('\n'), false);
+  });
+
+  it('computes DTEND as two hours after DTSTART across midnight', () => {
+    const lateEvent = [{ ...events[0], dateEvent: '2025-10-12', strTime: '23:30:00' }];
+    const ics = generateIcs(lateEvent, 'Storhamar', 'ehl', 'none', new Date('2026-03-22T06:00:00Z'));
+    assert.ok(ics.includes('DTSTART:20251012T233000Z'));
+    assert.ok(ics.includes('DTEND:20251013T013000Z'), 'end rolls into the next day');
+  });
+
+  it('renders one VEVENT per matching game', () => {
+    const two = [
+      events[0],
+      { idEvent: '124', strHomeTeam: 'Storhamar', strAwayTeam: 'Vålerenga',
+        dateEvent: '2025-10-19', strTime: '16:00:00', strVenue: 'Hamar OL-Amfi',
+        idHomeTeam: '133919', idAwayTeam: '133921' },
+    ];
+    const ics = generateIcs(two, 'Storhamar', 'ehl', 'none', new Date('2026-03-22T06:00:00Z'));
+    const count = ics.split('BEGIN:VEVENT').length - 1;
+    assert.equal(count, 2);
+  });
 });

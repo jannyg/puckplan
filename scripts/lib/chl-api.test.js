@@ -1,7 +1,8 @@
 // scripts/lib/chl-api.test.js
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchCurrentChlSeasonId, fetchChlGames } from './chl-api.js';
+import { fetchCurrentChlSeasonId, fetchChlGames, currentSeasonName, resolveTeamName } from './chl-api.js';
+import { generateIcs } from './ics.js';
 
 function makeFetcher(data) {
   return async () => ({ statusCode: 200, body: JSON.stringify(data) });
@@ -39,6 +40,42 @@ const nonNorwegianGame = {
 
 const seedTeamNames = ['Storhamar'];
 
+describe('currentSeasonName', () => {
+  it('returns year/next-year for month >= 6 (June boundary)', () => {
+    assert.equal(currentSeasonName(new Date('2025-06-01T00:00:00Z')), '2025/26');
+  });
+  it('returns year/next-year for a late-year date', () => {
+    assert.equal(currentSeasonName(new Date('2025-11-15T00:00:00Z')), '2025/26');
+  });
+  it('returns previous-year/year for month < 6 (May boundary)', () => {
+    assert.equal(currentSeasonName(new Date('2026-05-31T00:00:00Z')), '2025/26');
+  });
+  it('returns previous-year/year in January', () => {
+    assert.equal(currentSeasonName(new Date('2026-01-10T00:00:00Z')), '2025/26');
+  });
+  it('handles decade rollover (2029 -> 2029/30)', () => {
+    assert.equal(currentSeasonName(new Date('2029-09-01T00:00:00Z')), '2029/30');
+  });
+});
+
+describe('resolveTeamName', () => {
+  it('maps a fuller API name to the matching seed name', () => {
+    assert.equal(resolveTeamName('Storhamar Hamar', ['Storhamar']), 'Storhamar');
+  });
+  it('matches when the seed name is the longer string', () => {
+    assert.equal(resolveTeamName('Storhamar', ['Storhamar Hamar']), 'Storhamar Hamar');
+  });
+  it('returns the API name unchanged when no seed matches', () => {
+    assert.equal(resolveTeamName('Frölunda Gothenburg', ['Storhamar']), 'Frölunda Gothenburg');
+  });
+  it('returns the first matching seed when multiple seeds match', () => {
+    assert.equal(resolveTeamName('Storhamar Hamar', ['Storhamar', 'Hamar']), 'Storhamar');
+  });
+  it('does not match unrelated names that share no substring', () => {
+    assert.equal(resolveTeamName('KAC Klagenfurt', ['Storhamar', 'Sparta']), 'KAC Klagenfurt');
+  });
+});
+
 describe('fetchCurrentChlSeasonId', () => {
   it('returns correct season for month >= 6 (e.g. August 2025 → 2025/26)', async () => {
     const fetcher = makeFetcher(seasons);
@@ -63,6 +100,13 @@ describe('fetchCurrentChlSeasonId', () => {
 
   it('returns null on HTTP failure', async () => {
     const result = await fetchCurrentChlSeasonId(new Date(), makeFailFetcher());
+    assert.equal(result, null);
+  });
+
+  it('returns null when no season matches the date', async () => {
+    const fetcher = makeFetcher(seasons);
+    const date = new Date('2014-08-01T12:00:00Z'); // 2014/15 not in mock list
+    const result = await fetchCurrentChlSeasonId(date, fetcher);
     assert.equal(result, null);
   });
 });
@@ -96,6 +140,36 @@ describe('fetchChlGames', () => {
     assert.equal(result[0].idEvent, 'game-001');
   });
 
+  it('includes and normalizes games where the seed team plays away', async () => {
+    const awayGame = {
+      _entityId: 'game-away',
+      teams: {
+        home: { name: 'HC Davos', _entityId: 'team-dav' },
+        away: { name: 'Storhamar Hamar', _entityId: 'team-sh' },
+      },
+      startDate: '2026-09-04T17:45:00.000Z',
+      venue: { name: 'zondacrypto-Arena' },
+    };
+    const result = await fetchChlGames('def456', seedTeamNames, makeFetcher({ games: [awayGame] }));
+    assert.equal(result.length, 1);
+    assert.equal(result[0].strHomeTeam, 'HC Davos');
+    assert.equal(result[0].strAwayTeam, 'Storhamar');
+  });
+
+  it('defaults venue to empty string when missing', async () => {
+    const noVenue = {
+      _entityId: 'game-nv',
+      teams: {
+        home: { name: 'Storhamar Hamar', _entityId: 'team-sh' },
+        away: { name: 'Graz99ers', _entityId: 'team-gr' },
+      },
+      startDate: '2026-10-14T17:00:00.000Z',
+    };
+    const result = await fetchChlGames('def456', seedTeamNames, makeFetcher({ games: [noVenue] }));
+    assert.equal(result.length, 1);
+    assert.equal(result[0].strVenue, '');
+  });
+
   it('returns empty array on HTTP failure', async () => {
     const result = await fetchChlGames('def456', seedTeamNames, makeFailFetcher());
     assert.deepEqual(result, []);
@@ -119,5 +193,24 @@ describe('fetchChlGames', () => {
     const result = await fetchChlGames('def456', seedTeamNames, fetcher);
     assert.equal(result.length, 1);
     assert.equal(result[0].idEvent, 'game-001');
+  });
+});
+
+// Regression guard for the bug where CHL games never reached the feed because
+// the API name ("Storhamar Hamar") didn't exactly equal the seed name
+// ("Storhamar") that generateIcs filters on. Exercises both modules together.
+describe('CHL games → ICS pipeline', () => {
+  it('produces a VEVENT for a seed team even when the API uses a fuller name', async () => {
+    const games = await fetchChlGames('def456', ['Storhamar'], makeFetcher({ games: [norwegianGame] }));
+    const ics = generateIcs(
+      games.map(g => ({ ...g, _league: 'chl' })),
+      'Storhamar',
+      'chl',
+      'none',
+      new Date('2026-06-24T00:00:00Z'),
+    );
+    assert.ok(ics.includes('BEGIN:VEVENT'), 'feed must contain the match, not be empty');
+    assert.ok(ics.includes('SUMMARY:Storhamar vs Frölunda HC'));
+    assert.ok(ics.includes('UID:chl-game-001@puckplan.no'));
   });
 });
