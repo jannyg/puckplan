@@ -35,7 +35,7 @@ function normalizeWmEvent(ev) {
 export async function fetchWmGames(date = new Date(), _fetcher) {
   const season = currentNationalSeason(date);
   const wmYear = season.split('-')[1];
-  const url = `https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=${WM_LEAGUE_ID}&s=${wmYear}`;
+  const url = `https://www.thesportsdb.com/api/v1/json/123/eventsseason.php?id=${WM_LEAGUE_ID}&s=${wmYear}`;
   const data = _fetcher
     ? await fetchJson(url, true, _fetcher)
     : await fetchJson(url);
